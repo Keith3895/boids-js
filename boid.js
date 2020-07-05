@@ -1,34 +1,123 @@
 const canvas = document.getElementById("boidCanvas");
+
 const ctx = canvas.getContext("2d");
 boids = [];
-let globalCanvasHeight = 800;
+let globalCanvasHeight = 500;
 let globalCanvaswidth = 1000;
 canvas.width = globalCanvaswidth;
 canvas.height = globalCanvasHeight;
+const visualRange = 75;
+var numOfBoids = 150;
+var obstacles = [];
+var perches = [];
+var play = true;
+
+const playButton = document.getElementById("play");
+const pause = document.getElementById("pause");
 
 
+playButton.style.display = 'none';
+playButton.addEventListener('click', (e) => {
+    play = true;
+    window.requestAnimationFrame(updateFrame);
+    playButton.style.display = 'none';
+    pause.style.display = 'block';
+});
 
-const boundary = [];
-for (let i = 0; i < 4; i++) {
-    boundary[i] = { path: new Path2D(), id: i };
+
+pause.addEventListener('click', (e) => {
+    play = false;
+    pause.style.display = 'none';
+    playButton.style.display = 'block';
+});
+var perchTrigger;
+
+const perchEle = document.getElementById("perch");
+perchEle.addEventListener('click', (e) => {
+    perchTrigger = true;
+    perchEle.parentElement.style.color = 'green';
+    predator.parentElement.style.color = 'white';
+});
+const predator = document.getElementById("predator");
+predator.addEventListener('click', (e) => {
+    perchTrigger = false;
+    perchEle.parentElement.style.color = 'white';
+    predator.parentElement.style.color = 'red';
+});
+
+
+canvas.addEventListener('mousedown', function (event) {
+    canvas.addEventListener('mousemove', drawEvent);
+});
+
+canvas.addEventListener('mouseup', function (event) {
+    canvas.removeEventListener('mousemove', drawEvent);
+});
+drawEvent = (event) => {
+    if (perchTrigger === true) {
+        perches.push({
+            x: event.offsetX,
+            y: event.offsetY
+        });
+        modifier.perches = perches;
+    } else if (perchTrigger === false) {
+        obstacles.push({
+            x: event.offsetX,
+            y: event.offsetY
+        });
+        modifier.obstacles = obstacles;
+    }
 }
-boundary[0].path.rect(0, -130, globalCanvaswidth * 2, 150);
-boundary[1].path.rect(-130, 0, 150, globalCanvasHeight * 2);
-boundary[2].path.rect(globalCanvaswidth - 20, 0, 150, globalCanvasHeight * 2);
-boundary[3].path.rect(0, globalCanvasHeight - 20, globalCanvaswidth * 2, 150);
-// boundary.forEach((el, i) => {
-//     ctx.fill(el.path);
-// });
-for (let i = 0; i < 30; i++) {
-    boids[i] = new Boid(ctx, globalCanvaswidth, globalCanvasHeight, boundary);
+
+
+
+
+
+// init boids
+for (let i = 0; i < numOfBoids; i++) {
+    boids[i] = new Boid(ctx, globalCanvaswidth, globalCanvasHeight);
     boids[i].draw();
 }
-function updateAll() {
+
+
+// init boidModifier
+var modifier = new BoidsModifer(boids, obstacles, perches);
+function updateFrame() {
     ctx.clearRect(0, 0, globalCanvaswidth, globalCanvasHeight);
-    boundary.forEach((el, i) => {
-        ctx.fill(el.path);
+    // boundary.forEach((el, i) => {
+    //     ctx.fill(el.path);
+    // });
+    addObstaclesPerch();
+    boids.forEach(el => {
+        el = modifier.coherence(el);
+        el = modifier.avoidOthers(el);
+        el = modifier.avoidObstacles(el);
+        el = modifier.perch(el);
+        el = modifier.matchVelocity(el);
+        el.update();
     });
-    boids.forEach(el => el.update());
-    window.requestAnimationFrame(updateAll);
+    if (play == true)
+        window.requestAnimationFrame(updateFrame);
 }
-window.requestAnimationFrame(updateAll);
+
+
+
+function addObstaclesPerch() {
+    obstacles.forEach(el => {
+        const circle = new Path2D();
+        circle.arc(el.x, el.y, 10, 0, 2 * Math.PI);
+        ctx.fillStyle = 'red';
+        ctx.fill(circle);
+    });
+    perches.forEach(el => {
+        const circle = new Path2D();
+        circle.arc(el.x, el.y, 10, 0, 2 * Math.PI);
+        ctx.fillStyle = 'green';
+        ctx.fill(circle);
+    });
+}
+
+
+
+
+window.requestAnimationFrame(updateFrame);
