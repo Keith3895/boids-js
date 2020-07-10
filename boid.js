@@ -6,7 +6,6 @@ let globalCanvasHeight = 500;
 let globalCanvaswidth = 1000;
 canvas.width = globalCanvaswidth;
 canvas.height = globalCanvasHeight;
-const visualRange = 75;
 var numOfBoids = 150;
 var obstacles = [];
 var perches = [];

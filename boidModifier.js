@@ -2,6 +2,7 @@ class BoidsModifer {
     boids;
     obstacles;
     perches;
+    visualRange = 55;
     constructor(boids, obstacles, perches) {
         this.boids = boids;
         this.obstacles = obstacles;
@@ -17,7 +18,7 @@ class BoidsModifer {
         let numNeighbors = 0;
 
         for (let compareBoid of this.boids) {
-            if (this.distance(boidEl, compareBoid) < visualRange) {
+            if (this.distance(boidEl, compareBoid) < this.visualRange) {
                 centerX += compareBoid.x;
                 centerY += compareBoid.y;
                 numNeighbors += 1;
@@ -66,7 +67,7 @@ class BoidsModifer {
         let numNeighbors = 0;
 
         for (let otherBoid of this.boids) {
-            if (this.distance(boid, otherBoid) < visualRange) {
+            if (this.distance(boid, otherBoid) < this.visualRange) {
                 avgDX += otherBoid.dx;
                 avgDY += otherBoid.dy;
                 numNeighbors += 1;

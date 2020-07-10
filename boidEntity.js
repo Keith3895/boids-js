@@ -53,7 +53,7 @@ class Boid {
             x: this.x,
             y: this.y
         });
-        this.history = this.history.slice(-75);
+        this.history = this.history.slice(-50);
         this.draw();
     }
     acceleration() {
